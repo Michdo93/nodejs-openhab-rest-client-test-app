@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nodejs-openhab-rest-client · Testsuite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --border:   #30363d;
+    --accent:   #f78166;
+    --green:    #3fb950;
+    --yellow:   #d29922;
+    --red:      #f85149;
+    --blue:     #58a6ff;
+    --purple:   #bc8cff;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --mono:     'JetBrains Mono', monospace;
+    --sans:     'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .logo-title { font-size: 16px; font-weight: 600; letter-spacing: -0.5px; }
+  .logo-pkg { font-family: var(--mono); font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
+
+  .auth-bar { display: flex; align-items: center; gap: 12px; }
+  .input-group { display: flex; flex-direction: column; gap: 4px; }
+  .input-group label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+  input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    width: 150px;
+    transition: border-color 0.2s;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  input[type="password"] { width: 110px; }
+
+  .btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn.secondary:hover { background: rgba(255,255,255,0.05); }
+
+  .btn-blue { background: var(--blue); color: #000; }
+  .btn-green { background: var(--green); color: #000; }
+  .btn-purple { background: var(--purple); color: #000; }
+  .btn-yellow { background: var(--yellow); color: #000; }
+
+  main { flex: 1; display: flex; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar-head { padding: 16px 20px 8px 20px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.02); color: var(--accent); }
+  .nav-item.active {
+    background: rgba(247, 129, 102, 0.05);
+    border-left-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .nav-count { font-size: 10px; font-family: var(--mono); background: var(--border); color: var(--muted); padding: 1px 5px; border-radius: 10px; }
+
+  /* Workspace Layout */
+  .workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
+  
+  .content-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 220px; /* Platz für SSE Monitor im geöffneten Zustand */
+  }
+
+  .output-panel {
+    width: 450px;
+    background: #070a0e;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .section-title { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; color: var(--text); }
+
+  /* Test Cards */
+  .test-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .test-card:hover { border-color: #444; }
+  .test-card.running { border-color: var(--yellow); }
+  .test-card.success { border-color: rgba(63, 185, 80, 0.4); }
+  .test-card.error { border-color: rgba(248, 81, 73, 0.4); }
+
+  .test-card-head {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    background: rgba(255,255,255,0.01);
+  }
+  .test-name { font-weight: 500; font-size: 13.5px; }
+  .badge {
+    font-size: 9px;
+    font-family: var(--mono);
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--border);
+    color: var(--muted);
+  }
+  .status-running { background: rgba(210, 153, 34, 0.15); color: var(--yellow); }
+  .status-success { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+  .status-error   { background: rgba(248, 81, 73, 0.15); color: var(--red); }
+
+  .test-params {
+    padding: 0 18px;
+    max-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    background: rgba(0,0,0,0.1);
+    transition: all 0.2s ease-out;
+    border-top: 1px solid transparent;
+  }
+  .test-params.open { padding: 14px 18px; max-height: 200px; border-top-color: var(--border); }
+
+  .param-field { display: flex; align-items: center; gap: 8px; }
+  .param-field label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .param-input { width: 140px; padding: 4px 8px; font-size: 11px; }
+
+  .test-result {
+    padding: 14px 18px;
+    background: #070a0e;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #c9d1d9;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    display: none;
+    max-height: 400px;
+  }
+
+  /* Log Monitor */
+  .output-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+  .output-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+  
+  #log {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    background: #070a0e;
+  }
+  #log-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  
+  .log-line { display: flex; gap: 8px; line-height: 1.4; border-radius: 3px; padding: 2px 4px; }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-msg { white-space: pre-wrap; word-break: break-all; }
+  .log-info { color: #e6edf3; }
+  .log-err { color: var(--red); background: rgba(248,81,73,0.05); }
+  .log-sse { color: var(--purple); }
+
+  .stats-bar {
+    padding: 8px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+  }
+  .stats-bar .n { font-weight: 700; color: var(--text); }
+  .stats-bar .green { color: var(--green); }
+  .stats-bar .red { color: var(--red); }
+  .stats-bar .yellow { color: var(--yellow); }
+
+  /* SSE Floating Monitor */
+  .sse-monitor {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    right: 466px;
+    height: 180px;
+    background: rgba(22, 27, 34, 0.95);
+    border: 1px solid var(--purple);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 5;
+    transform: translateY(220px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sse-monitor.active { transform: translateY(0); }
+  .sse-monitor-head {
+    padding: 8px 14px;
+    background: rgba(188, 140, 255, 0.1);
+    border-bottom: 1px solid rgba(188, 140, 255, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sse-badge { background: var(--purple); color: #000; font-size: 9px; font-family: var(--mono); font-weight: 700; padding: 1px 4px; border-radius: 3px; }
+  .sse-monitor-title { font-size: 11px; font-weight: 600; color: var(--purple); text-transform: uppercase; }
+  #sse-log { flex: 1; padding: 10px; overflow-y: auto; font-family: var(--mono); font-size: 11px; color: #bc8cff; display: flex; flex-direction: column; gap: 2px; background: #070a0e; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <span class="logo-title">openHAB REST</span>
+    <span class="logo-pkg">nodejs-openhab-rest-client</span>
+  </div>
+  <div class="auth-bar">
+    <div class="input-group">
+      <label>openHAB URL</label>
+      <input type="text" id="url-input" value="http://192.168.0.5:8080">
+    </div>
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="user-input" value="openhab">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="pass-input" value="habopen">
+    </div>
+    <div class="input-group">
+      <label>API Token (Opt)</label>
+      <input type="password" id="token-input" placeholder="oh.api.xxxx">
+    </div>
+    <button class="btn" id="connect-btn" style="margin-top: 14px;">Verbinden</button> 
+  </div>
+</header>
+
+<main>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-head">REST-Klassen</div>
+  </div>
+  
+  <div class="workspace">
+    <div class="content-panel">
+      <h2 class="section-title" id="section-title">Klasse wählen</h2>
+      <div id="cards-list" style="display:flex; flex-direction:column; gap:16px;">
+        <div style="color:var(--muted); font-size:13px; padding:20px; text-align:center;">
+          Klasse aus der Seitenleiste wählen
+        </div>
+      </div>
+    </div>
+    <div class="output-panel">
+      <div class="output-header">
+        <span class="output-title" id="log-title">Ausgabe</span>
+        <button class="btn secondary clear-btn" id="clear-btn">✕ Leeren</button>
+      </div>
+      <div id="log">
+        <ul id="log-list"></ul>
+      </div>
+      <div class="stats-bar">
+        <span>Tests: <span class="n" id="stat-total">0</span></span>
+        <span>✓ <span class="n green" id="stat-pass">0</span></span>
+        <span>✗ <span class="n red"   id="stat-fail">0</span></span>
+        <span>⏳ <span class="n yellow" id="stat-run">0</span></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="sse-monitor" id="sse-monitor">
+  <div class="sse-monitor-head">
+    <span class="sse-badge">SSE</span>
+    <span class="sse-monitor-title" id="sse-monitor-title">Livestream</span>
+    <button class="btn secondary" id="stop-sse-btn" style="padding:2px 8px; font-size:11px;">■ Stop</button>
+  </div>
+  <div id="sse-log"></div>
+</div>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>
