@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // Sorgt dafür, dass Assets relativ zum Repository-Pfad geladen werden
-  base: '/nodejs-openhab-rest-client-test-app/', 
+  // Der Pfad muss exakt dem Namen deines GitHub-Repositories entsprechen!
+  base: '/nodejs-openhab-rest-client-test-app/',
 });
