@@ -1,5 +1,5 @@
 {
-  "name": "openhab-test-app",
+  "name": "nodejs-openhab-rest-client-test-app",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
